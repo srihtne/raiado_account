@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>初回登録</title>
+</head>
+<body>
+  <h1>初回登録</h1>
+  <input type="text" id="username" placeholder="ユーザー名">
+  <input type="email" id="email" placeholder="メールアドレス">
+  <input type="password" id="password" placeholder="パスワード">
+  <button id="signupBtn">登録</button>
+
+  <script type="module">
+    import { supabase } from './main.js';
+
+    const code = localStorage.getItem('serialCode');
+
+    document.getElementById('signupBtn').addEventListener('click', async () => {
+      const uname = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      // 1. Authで登録
+      const { user, error: authError } = await supabase.auth.signUp({ email, password });
+      if (authError) return alert(authError.message);
+
+      // 2. serial_codesを更新
+      const { error: dbError } = await supabase
+        .from('serial_codes')
+        .update({ used: true, user_id: user.id, username: uname })
+        .eq('code', code);
+
+      if (dbError) return alert(dbError.message);
+
+      alert('登録完了！ログインしてください');
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

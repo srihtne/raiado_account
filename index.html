@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>シリアル番号チェック</title>
+</head>
+<body>
+  <h1>シリアル番号を入力</h1>
+  <input type="text" id="code" placeholder="シリアル番号">
+  <button id="checkBtn">チェック</button>
+
+  <script type="module">
+    import { supabase } from './main.js';
+
+    document.getElementById('checkBtn').addEventListener('click', async () => {
+      const code = document.getElementById('code').value;
+
+      const { data, error } = await supabase
+        .from('serial_codes')
+        .select('*')
+        .eq('code', code)
+        .single();
+
+      if (error || !data) {
+        alert('無効なシリアル番号です');
+        return;
+      }
+
+      if (data.used) {
+        // 使用済み → loginページへ
+        localStorage.setItem('serialCode', code);
+        window.location.href = 'login.html';
+      } else {
+        // 未使用 → signupページへ
+        localStorage.setItem('serialCode', code);
+        window.location.href = 'signup.html';
+      }
+    });
+  </script>
+</body>
+</html>
